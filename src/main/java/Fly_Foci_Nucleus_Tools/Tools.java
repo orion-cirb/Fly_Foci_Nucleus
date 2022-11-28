@@ -46,7 +46,7 @@ public class Tools {
     private CLIJ2 clij2 = CLIJ2.getInstance();
     private final ImageIcon icon = new ImageIcon(this.getClass().getResource("/Orion_icon.png"));
     
-    public String[] channelNames = {"DAPI", "Foci", "Other"};
+    public String[] channelNames = {"DAPI", "Foci", "SC"};
     public Calibration cal = new Calibration();
     public double pixVol = 0;
     

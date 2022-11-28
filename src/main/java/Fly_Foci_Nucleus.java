@@ -129,15 +129,15 @@ public class Fly_Foci_Nucleus implements PlugIn {
                 // Open channel3
                 System.out.println("- Analyzing " + tools.channelNames[2] + " channel -");
                 indexCh = ArrayUtils.indexOf(chsName, channels[2]);
-                ImagePlus imgCh3 = BF.openImagePlus(options)[indexCh];
+                ImagePlus imgSC = BF.openImagePlus(options)[indexCh];
                 
                 // Save images
-                tools.saveImgObjects(nucPop, fociPop, imgCh3, rootName, outDirResults);
+                tools.saveImgObjects(nucPop, fociPop, imgSC, rootName, outDirResults);
                 
                 // Write results
-                tools.saveResults(nucPop, fociPop, imgFoci, imgCh3, rootName, outPutResults);
+                tools.saveResults(nucPop, fociPop, imgFoci, imgSC, rootName, outPutResults);
                 tools.flush_close(imgFoci);
-                tools.flush_close(imgCh3);
+                tools.flush_close(imgSC);
             }
             outPutResults.close();
         } catch (IOException | FormatException | DependencyException | ServiceException | io.scif.DependencyException ex) {
