@@ -1,12 +1,11 @@
-package JellyFish_Foci_Nucleus_Tools;
+package Fly_Foci_Nucleus_Tools;
 
-import JellyFich_Cellpose.CellposeSegmentImgPlusAdvanced;
-import JellyFich_Cellpose.CellposeTaskSettings;
-import JellyFish_StardistOrion.StarDist2D;
+import Fly_Cellpose.CellposeSegmentImgPlusAdvanced;
+import Fly_Cellpose.CellposeTaskSettings;
+import Fly_StardistOrion.StarDist2D;
 import fiji.util.gui.GenericDialogPlus;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.gui.WaitForUserDialog;
 import ij.io.FileSaver;
 import ij.measure.Calibration;
 import ij.plugin.Duplicator;
@@ -32,7 +31,6 @@ import mcib3d.geom2.Objects3DIntPopulation;
 import mcib3d.geom2.Objects3DIntPopulationComputation;
 import mcib3d.geom2.measurements.MeasureIntensity;
 import mcib3d.geom2.measurements.MeasureVolume;
-import mcib3d.geom2.measurementsPopulation.MeasurePopulationColocalisation;
 import mcib3d.image3d.ImageHandler;
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij2.CLIJ2;
@@ -47,7 +45,7 @@ public class Tools {
     private CLIJ2 clij2 = CLIJ2.getInstance();
     private final ImageIcon icon = new ImageIcon(this.getClass().getResource("/Orion_icon.png"));
     
-    public String[] channelNames = {"DAPI", "Foci"};
+    public String[] channelNames = {"DAPI", "Foci", "Other"};
     public Calibration cal = new Calibration();
     public double pixVol = 0;
     
@@ -226,6 +224,13 @@ public class Tools {
                     else 
                         channels[n] = meta.getChannelExcitationWavelength(0, n).value().toString();
                 break;    
+            case "lsm" :
+                for (int n = 0; n < chs; n++) 
+                    if (meta.getChannelID(0, n) == null)
+                        channels[n] = Integer.toString(n);
+                    else 
+                        channels[n] = channels[n] = meta.getChannelName(0, n).toString();
+                break; 
             default :
                 for (int n = 0; n < chs; n++)
                     channels[n] = Integer.toString(n);
@@ -372,8 +377,7 @@ public class Tools {
      * @return objects population
      */
    public Objects3DIntPopulation stardistFociInNucleusPop(ImagePlus imgFoci, Objects3DIntPopulation nucPop) throws IOException{
-        ImagePlus img = new Duplicator().run(imgFoci);
-
+       ImagePlus img = new Duplicator().run(imgFoci);
        // StarDist
        File starDistModelFile = new File(modelsPath+File.separator+stardistFociModel);
        StarDist2D star = new StarDist2D(syncObject, starDistModelFile);
@@ -451,13 +455,15 @@ public class Tools {
      * @param file
      * @throws java.io.IOException
      */
-    public void saveResults(Objects3DIntPopulation nucPop, Objects3DIntPopulation fociPop, ImagePlus imgFoci, String imgName, BufferedWriter file) throws IOException {
+    public void saveResults(Objects3DIntPopulation nucPop, Objects3DIntPopulation fociPop, ImagePlus imgFoci, ImagePlus imgCh3, String imgName, 
+            BufferedWriter file) throws IOException {
         for (Object3DInt nuc : nucPop.getObjects3DInt()) {
             float nucLabel = nuc.getLabel();
             double nucVol = new MeasureVolume(nuc).getValueMeasurement(MeasureVolume.VOLUME_UNIT);
+            double nucInt = new MeasureIntensity(nuc, ImageHandler.wrap(imgCh3)).getValueMeasurement(MeasureIntensity.INTENSITY_SUM);
             Objects3DIntPopulation fociNucPop = findFociNuc(nucLabel, fociPop);
             int fociNb = fociNucPop.getNbObjects();
-            file.write(imgName+"\t"+nucLabel+"\t"+nucVol+"\t"+fociNb+"\t");
+            file.write(imgName+"\t"+nucLabel+"\t"+nucVol+"\t"+nucInt+"\t"+fociNb+"\t");
             for (Object3DInt foci : fociNucPop.getObjects3DInt()) {
                 float fociLabel = foci.getLabel();
                 double fociVol = new MeasureVolume(foci).getValueMeasurement(MeasureVolume.VOLUME_UNIT);

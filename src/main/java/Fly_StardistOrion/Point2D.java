@@ -1,4 +1,4 @@
-package JellyFish_StardistOrion;
+package Fly_StardistOrion;
 
 public class Point2D {
     

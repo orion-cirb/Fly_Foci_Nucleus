@@ -1,4 +1,4 @@
-package JellyFich_Cellpose;
+package Fly_Cellpose;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import static java.io.File.separatorChar;
 
 import ij.IJ;
-import JellyFich_Cellpose.CellposeTaskSettings;
+import Fly_Cellpose.CellposeTaskSettings;
 
 
 public class Cellpose {

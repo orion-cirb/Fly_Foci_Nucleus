@@ -7,10 +7,10 @@
 
         
 	<groupId>cirb</groupId>
-	<artifactId>JellyFish_Foci_Nucleus</artifactId>
+	<artifactId>Fly_Foci_Nucleus</artifactId>
 	<version>1.0.0</version>
         <packaging>jar</packaging>
-	<name>JellyFish_Foci_Nucleus</name>
+	<name>Fly_Foci_Nucleus</name>
 	<description>
             Find foci in nucleus
         </description>
@@ -33,7 +33,7 @@
 	<properties>
                 <imagej.app.directory>/opt/Fiji.app/</imagej.app.directory>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<main-class>JellyFish_Foci_Nucleus.jar</main-class>
+		<main-class>Fly_Foci_Nucleus.jar</main-class>
 	</properties>
 
 	<dependencies>

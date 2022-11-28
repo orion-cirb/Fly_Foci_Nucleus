@@ -3,7 +3,7 @@
  * Author: Philippe Mailly
  */
 
-import JellyFish_Foci_Nucleus_Tools.Tools;
+import Fly_Foci_Nucleus_Tools.Tools;
 import ij.*;
 import ij.plugin.PlugIn;
 import java.io.BufferedWriter;
@@ -30,7 +30,7 @@ import org.scijava.util.ArrayUtils;
 
 
 
-public class JellyFish_Foci_Nucleus implements PlugIn {
+public class Fly_Foci_Nucleus implements PlugIn {
     
     Tools tools = new Tools();
     private boolean canceled = false;
@@ -68,7 +68,7 @@ public class JellyFish_Foci_Nucleus implements PlugIn {
                 outDir.mkdir();
             }
             // Write header in results file
-            String header = "Image name\tNucleus ID\tNucleus volume (µm3)\tFoci nb\t#Foci\tFoci volume(µm3)\tFoci sum intensity\n";
+            String header = "Image name\tNucleus ID\tNucleus volume (µm3)\tNucleus intensity in channel 3\tFoci nb\t#Foci\tFoci volume(µm3)\tFoci sum intensity\n";
             FileWriter fwResults = new FileWriter(outDirResults + "results.xls", false);
             outPutResults = new BufferedWriter(fwResults);
             outPutResults.write(header);
@@ -112,8 +112,9 @@ public class JellyFish_Foci_Nucleus implements PlugIn {
                 System.out.println("- Analyzing " + tools.channelNames[0] + " channel -");
                 int indexCh = ArrayUtils.indexOf(chsName, channels[0]);
                 ImagePlus imgDAPI = BF.openImagePlus(options)[indexCh];
+                tools.flush_close(imgDAPI);
                 
-                // Find DAPI nuclei with StarDist
+                // Find DAPI nuclei with StarDist/Cellpose
                 System.out.println("Finding " + tools.channelNames[0] + " nuclei....");
                 //Objects3DIntPopulation nucPop = tools.stardistNucleiPop(imgDAPI);
                 Objects3DIntPopulation nucPop = tools.cellposeDetection(imgDAPI, 0.5, true);
@@ -128,17 +129,22 @@ public class JellyFish_Foci_Nucleus implements PlugIn {
                 Objects3DIntPopulation fociPop = tools.stardistFociInNucleusPop(imgFoci, nucPop);
                 System.out.println(fociPop.getNbObjects() + "Foci colocalized with " + tools.channelNames[0] + " nuclei");
                
+                // Open channel3
+                System.out.println("- Analyzing " + tools.channelNames[2] + " channel -");
+                indexCh = ArrayUtils.indexOf(chsName, channels[2]);
+                ImagePlus imgCh3 = BF.openImagePlus(options)[indexCh];
+                
                 // Save images
-                tools.saveImgObjects(nucPop, fociPop, imgDAPI, rootName, outDirResults);
-                tools.flush_close(imgDAPI);
+                tools.saveImgObjects(nucPop, fociPop, imgCh3, rootName, outDirResults);
                 
                 // Write results
-                tools.saveResults(nucPop, fociPop, imgFoci, rootName, outPutResults);
+                tools.saveResults(nucPop, fociPop, imgFoci, imgCh3, rootName, outPutResults);
                 tools.flush_close(imgFoci);
+                tools.flush_close(imgCh3);
             }
             outPutResults.close();
         } catch (IOException | FormatException | DependencyException | ServiceException | io.scif.DependencyException ex) {
-            Logger.getLogger(JellyFish_Foci_Nucleus.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Fly_Foci_Nucleus.class.getName()).log(Level.SEVERE, null, ex);
         }
         System.out.println("--- All done! ---");
     }    

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package JellyFish_StardistOrion;
+package Fly_StardistOrion;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
