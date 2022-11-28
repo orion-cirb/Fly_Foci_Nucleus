@@ -428,7 +428,6 @@ public class Tools {
         CellposeSegmentImgPlusAdvanced cellpose = new CellposeSegmentImgPlusAdvanced(settings, imgIn);
         ImagePlus imgOut = (resize) ? cellpose.run().resize(imgWidth, imgHeight, 1, "none") : cellpose.run();   
         imgOut.setCalibration(cal);
-        imgOut.show();
         
         Objects3DIntPopulation pop = new Objects3DIntPopulation(ImageHandler.wrap(imgOut));
         Objects3DIntPopulation popFilter = new Objects3DIntPopulationComputation(pop).getExcludeBorders(ImageHandler.wrap(img), false);
