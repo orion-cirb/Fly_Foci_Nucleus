@@ -82,7 +82,6 @@ public class Fly_Foci_Nucleus implements PlugIn {
             ImageProcessorReader reader = new ImageProcessorReader();
             reader.setMetadataStore(meta);
             reader.setId(imageFiles.get(0));
-            
             // Find image calibration
             tools.cal = tools.findImageCalib(meta);
             
@@ -101,7 +100,6 @@ public class Fly_Foci_Nucleus implements PlugIn {
                 String rootName = FilenameUtils.getBaseName(f);
                 System.out.println("--- ANALYZING IMAGE " + rootName + " ------");
                 reader.setId(f);
-                
                 ImporterOptions options = new ImporterOptions();
                 options.setId(f);
                 options.setSplitChannels(true);
@@ -112,14 +110,13 @@ public class Fly_Foci_Nucleus implements PlugIn {
                 System.out.println("- Analyzing " + tools.channelNames[0] + " channel -");
                 int indexCh = ArrayUtils.indexOf(chsName, channels[0]);
                 ImagePlus imgDAPI = BF.openImagePlus(options)[indexCh];
-                tools.flush_close(imgDAPI);
                 
-                // Find DAPI nuclei with StarDist/Cellpose
+                // Find DAPI nuclei with Cellpose
                 System.out.println("Finding " + tools.channelNames[0] + " nuclei....");
-                //Objects3DIntPopulation nucPop = tools.stardistNucleiPop(imgDAPI);
                 Objects3DIntPopulation nucPop = tools.cellposeDetection(imgDAPI, 0.5, true);
                 System.out.println(nucPop.getNbObjects() + " " + tools.channelNames[0] + " nuclei found");
-
+                tools.flush_close(imgDAPI);
+                
                 // Open Foci channel
                 System.out.println("- Analyzing " + tools.channelNames[1] + " channel -");
                 indexCh = ArrayUtils.indexOf(chsName, channels[1]);

@@ -6,6 +6,7 @@ import Fly_StardistOrion.StarDist2D;
 import fiji.util.gui.GenericDialogPlus;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.WaitForUserDialog;
 import ij.io.FileSaver;
 import ij.measure.Calibration;
 import ij.plugin.Duplicator;
@@ -133,6 +134,9 @@ public class Tools {
                     ext = fileExt;
                     break;
                 case "isc2" :
+                    ext = fileExt;
+                    break;
+                case "lsm" :
                     ext = fileExt;
                     break;
                 case "tif" :
@@ -418,11 +422,14 @@ public class Tools {
         // Set Cellpose settings
         CellposeTaskSettings settings = new CellposeTaskSettings(cellposeModel, 1, cellPoseNucDiameter, cellposeEnvDirPath);
         settings.useGpu(true);
+        settings.setFlowTh(0.4);
         settings.setStitchThreshold(0.25);
         // Run Omnipose
         CellposeSegmentImgPlusAdvanced cellpose = new CellposeSegmentImgPlusAdvanced(settings, imgIn);
         ImagePlus imgOut = (resize) ? cellpose.run().resize(imgWidth, imgHeight, 1, "none") : cellpose.run();   
         imgOut.setCalibration(cal);
+        imgOut.show();
+        
         Objects3DIntPopulation pop = new Objects3DIntPopulation(ImageHandler.wrap(imgOut));
         Objects3DIntPopulation popFilter = new Objects3DIntPopulationComputation(pop).getExcludeBorders(ImageHandler.wrap(img), false);
         popFilterOneZ(popFilter);
@@ -430,7 +437,7 @@ public class Tools {
         // Close images
         flush_close(imgIn);
         flush_close(imgOut);
-        return(pop);
+        return(popFilter);
     }
      
     /**
@@ -464,12 +471,14 @@ public class Tools {
             Objects3DIntPopulation fociNucPop = findFociNuc(nucLabel, fociPop);
             int fociNb = fociNucPop.getNbObjects();
             file.write(imgName+"\t"+nucLabel+"\t"+nucVol+"\t"+nucInt+"\t"+fociNb+"\t");
+            if (fociNb == 0)
+                file.write("\n");
             for (Object3DInt foci : fociNucPop.getObjects3DInt()) {
                 float fociLabel = foci.getLabel();
                 double fociVol = new MeasureVolume(foci).getValueMeasurement(MeasureVolume.VOLUME_UNIT);
                 double fociInt = new MeasureIntensity(foci, ImageHandler.wrap(imgFoci)).getValueMeasurement(MeasureIntensity.INTENSITY_SUM);
                 if (fociLabel != 1)
-                    file.write("\t\t\t\t");
+                    file.write("\t\t\t\t\t");
                 file.write(fociLabel+"\t"+fociVol+"\t"+fociInt+"\n");
                 file.flush();
             }
