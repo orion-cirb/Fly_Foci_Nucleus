@@ -61,19 +61,6 @@ public class Fly_Foci_Nucleus implements PlugIn {
                 return;
             }   
             
-            // Create output folder
-            outDirResults = imageDir + File.separator + "Results" + File.separator;
-            File outDir = new File(outDirResults);
-            if (!Files.exists(Paths.get(outDirResults))) {
-                outDir.mkdir();
-            }
-            // Write header in results file
-            String header = "Image name\tNucleus ID\tNucleus volume (µm3)\tNucleus intensity in channel 3\tFoci nb\t#Foci\tFoci volume(µm3)\tFoci sum intensity\n";
-            FileWriter fwResults = new FileWriter(outDirResults + "results.xls", false);
-            outPutResults = new BufferedWriter(fwResults);
-            outPutResults.write(header);
-            outPutResults.flush();
-                      
             // Create OME-XML metadata store of the latest schema version
             ServiceFactory factory;
             factory = new ServiceFactory();
@@ -94,6 +81,19 @@ public class Fly_Foci_Nucleus implements PlugIn {
                 IJ.showStatus("Plugin cancelled");
                 return;
             }         
+            
+             // Create output folder
+            outDirResults = imageDir + File.separator + "Results" + File.separator;
+            File outDir = new File(outDirResults);
+            if (!Files.exists(Paths.get(outDirResults))) {
+                outDir.mkdir();
+            }
+            // Write header in results file
+            String header = "Image name\tNucleus ID\tNucleus volume (µm3)\tNucleus intensity in channel 3\tFoci nb\t#Foci\tFoci volume(µm3)\tFoci sum intensity\n";
+            FileWriter fwResults = new FileWriter(outDirResults + "results_"+tools.fociDetectionMethod+".xls", false);
+            outPutResults = new BufferedWriter(fwResults);
+            outPutResults.write(header);
+            outPutResults.flush();
             
             
             for (String f : imageFiles) {
@@ -123,7 +123,8 @@ public class Fly_Foci_Nucleus implements PlugIn {
                 ImagePlus imgFoci = BF.openImagePlus(options)[indexCh];
                 
                 // Find PML foci with StarDist
-                Objects3DIntPopulation fociPop = tools.stardistFociInNucleusPop(imgFoci, nucPop);
+                Objects3DIntPopulation fociPop = (tools.fociDetectionMethod.equals("Stardist")) ? tools.stardistFociInNucleusPop(imgFoci, nucPop) : 
+                        tools.fociLOGDetection(imgFoci, nucPop);
                 System.out.println(fociPop.getNbObjects() + "Foci colocalized with " + tools.channelNames[0] + " nuclei");
                
                 // Open channel3
