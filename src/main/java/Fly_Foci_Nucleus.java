@@ -89,7 +89,7 @@ public class Fly_Foci_Nucleus implements PlugIn {
                 outDir.mkdir();
             }
             // Write header in results file
-            String header = "Image name\tNucleus ID\tNucleus volume (µm3)\tNucleus intensity in channel 3\tFoci nb\t#Foci\tFoci volume(µm3)\tFoci sum intensity\n";
+            String header = "Image name\tNucleus ID\tNucleus volume (µm3)\tNucleus Intensity in SC channel\tFoci nb\t#Foci\tFoci volume(µm3)\tFoci sum intensity\n";
             FileWriter fwResults = new FileWriter(outDirResults + "results_"+tools.fociDetectionMethod+".xls", false);
             outPutResults = new BufferedWriter(fwResults);
             outPutResults.write(header);
@@ -127,18 +127,17 @@ public class Fly_Foci_Nucleus implements PlugIn {
                         tools.fociLOGDetection(imgFoci, nucPop);
                 System.out.println(fociPop.getNbObjects() + "Foci colocalized with " + tools.channelNames[0] + " nuclei");
                
-                // Open channel3
-                System.out.println("- Analyzing " + tools.channelNames[2] + " channel -");
-                indexCh = ArrayUtils.indexOf(chsName, channels[2]);
+                // Open SC channel
+                System.out.println("- Analyzing " + tools.channelNames[1] + " channel -");
+                indexCh = ArrayUtils.indexOf(chsName, channels[1]);
                 ImagePlus imgSC = BF.openImagePlus(options)[indexCh];
                 
                 // Save images
-                tools.saveImgObjects(nucPop, fociPop, imgSC, rootName, outDirResults);
+                tools.saveImgObjects(nucPop, fociPop, imgFoci,rootName, outDirResults);
                 
                 // Write results
                 tools.saveResults(nucPop, fociPop, imgFoci, imgSC, rootName, outPutResults);
                 tools.flush_close(imgFoci);
-                tools.flush_close(imgSC);
             }
             outPutResults.close();
         } catch (IOException | FormatException | DependencyException | ServiceException | io.scif.DependencyException ex) {
