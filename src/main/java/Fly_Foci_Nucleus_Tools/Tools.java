@@ -150,6 +150,9 @@ public class Tools {
                 case "ics" :
                     ext = fileExt;
                     break;
+                case "ics2" :
+                    ext = fileExt;
+                    break;
                 case "lsm" :
                     ext = fileExt;
                     break;
