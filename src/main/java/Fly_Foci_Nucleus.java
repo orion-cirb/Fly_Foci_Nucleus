@@ -95,7 +95,7 @@ public class Fly_Foci_Nucleus implements PlugIn {
             outPutResults.write(header);
             outPutResults.flush();
             
-            if (file_ext.equals("csi") || file_ext.equals("csi2"))
+            if (file_ext.equals("ics") || file_ext.equals("ics2"))
                 tools.stardistProbThreshFoci = 0.2;
                        
             for (String f : imageFiles) {

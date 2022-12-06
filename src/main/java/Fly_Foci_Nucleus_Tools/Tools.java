@@ -76,8 +76,10 @@ public class Tools {
     private double minFociVol = 0.003;
     private double maxFociVol = 2;
     private double fociTh = 500;
-    private String[] fociDetectionMethods = {"Stardist", "LOG"};
+    private String[] fociDetectionMethods = {"Stardist", "DOG", "LOG"};
     public String fociDetectionMethod = "";
+    private double minFociDOG = 1;
+    private double maxFociDOG = 2;
     
     
     /**
@@ -406,21 +408,74 @@ public class Tools {
        clij2.median3DBox(imgCL, imgCLMed, sizeXY, sizeXY, sizeZ);
        ImagePlus imgMed = clij2.pull(imgCLMed);
        return(imgMed);
-    }  
+    } 
+    
+     /**
+     * Difference of Gaussians 
+     * Using CLIJ2
+     * @param img
+     * @param size1
+     * @param size2
+     * @return imgGauss
+     */ 
+    public ImagePlus DOG(ImagePlus img, double size1, double size2) {
+        ClearCLBuffer imgCL = clij2.push(img);
+        ClearCLBuffer imgCLDOG = clij2.create(imgCL);
+        clij2.differenceOfGaussian3D(imgCL, imgCLDOG, size1, size1, size1, size2, size2, size2);
+        clij2.release(imgCL);
+        ImagePlus imgDOG = clij2.pull(imgCLDOG);
+        clij2.release(imgCLDOG);
+        return(imgDOG);
+    }
+    
+    
+    /**
+     * Laplace of Gaussians 
+     * Using CLIJ2
+     * @param imgCL
+     * @param size
+     * @return imgLOG
+     */ 
+    public ImagePlus laplacianOfGaussian(ImagePlus img, double size) {
+        ClearCLBuffer imgCL = clij2.push(img);
+        ClearCLBuffer temp1 = clij2.create(imgCL);
+        ClearCLBuffer imgCLLOG = clij2.create(imgCL);
+        clij2.gaussianBlur2D(imgCL, temp1, size, size);
+        clij2.laplaceBox(temp1, imgCLLOG);
+        clij2.release(imgCL);
+        clij2.release(temp1);
+        ImagePlus imgLog = clij2.pull(imgCLLOG);
+        clij2.release(imgCLLOG);
+        return(imgLog);
+    }
+    
+    
+    /**
+     * Threshold 
+     * USING CLIJ2
+     * @param imgCL
+     * @param thMed
+     */
+    public ImagePlus threshold(ImagePlus img, String thMed) {
+        ClearCLBuffer imgCL = clij2.push(img);
+        ClearCLBuffer imgCLBin = clij2.create(imgCL);
+        clij2.automaticThreshold(imgCL, imgCLBin, thMed);
+        clij2.release(imgCL);
+        ImagePlus imgBin = clij2.pull(imgCLBin);
+        clij2.release(imgCLBin);
+        return(imgBin);
+    }
     
     
    public Objects3DIntPopulation fociLOGDetection (ImagePlus imgFoci, Objects3DIntPopulation nucPop) {
-       ImagePlus imgLOG = new Duplicator().run(imgFoci);
-       IJ.run(imgLOG, "Laplacian of Gaussian", "sigma=2 scale_normalised negate stack");
-       IJ.run(imgLOG, "Median...", "radius=2 stack");
-       IJ.setAutoThreshold(imgLOG, "Moments dark stack");
-       Prefs.blackBackground = false;
-       IJ.run(imgLOG, "Convert to Mask", "method=Moments background=Dark");
-       imgLOG.setCalibration(cal);
+       ImagePlus imgFilter = (fociDetectionMethod.equals("DOG") ? DOG(imgFoci, minFociDOG, maxFociDOG) : laplacianOfGaussian(imgFoci, maxFociDOG));
+       ImagePlus imgBin = threshold(imgFilter, "Moments");
+       flush_close(imgFilter);
+       imgBin.setCalibration(cal);
        // label binary images first
        ImageLabeller labeller = new ImageLabeller();
-       ImageInt labels = labeller.getLabels(ImageHandler.wrap(imgLOG));
-       flush_close(imgLOG);
+       ImageInt labels = labeller.getLabels(ImageHandler.wrap(imgBin));
+       flush_close(imgBin);
        Objects3DIntPopulation fociPop = new Objects3DIntPopulation(labels);
        labels.closeImagePlus();
        System.out.println("Found "+fociPop.getNbObjects()+" foci");
