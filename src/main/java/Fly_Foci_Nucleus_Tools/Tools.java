@@ -147,10 +147,10 @@ public class Tools {
                 case "lif"  :
                     ext = fileExt;
                     break;
-                case "isc" :
+                case "ics" :
                     ext = fileExt;
                     break;
-                case "isc2" :
+                case "ics2" :
                     ext = fileExt;
                     break;
                 case "lsm" :
