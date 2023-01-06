@@ -89,8 +89,9 @@ public class Fly_Foci_Nucleus implements PlugIn {
                 outDir.mkdir();
             }
             // Write header in results file
+            String fociModel = tools.stardistFociModel.split(".zip")[0];
             String header = "Image name\tNucleus ID\tNucleus volume (µm3)\tNucleus intensity in channel 3\tFoci nb\t#Foci\tFoci volume(µm3)\tFoci sum intensity\n";
-            FileWriter fwResults = new FileWriter(outDirResults + "results_"+tools.fociDetectionMethod+".xls", false);
+            FileWriter fwResults = new FileWriter(outDirResults + "results_"+tools.fociDetectionMethod+"_"+fociModel+".xls", false);
             outPutResults = new BufferedWriter(fwResults);
             outPutResults.write(header);
             outPutResults.flush();

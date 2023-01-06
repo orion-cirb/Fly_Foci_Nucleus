@@ -68,7 +68,7 @@ public class Tools {
     private final double stardistOverlayThreshFoci = 0.25;
     private File modelsPath = new File(IJ.getDirectory("imagej")+File.separator+"models");
     public String stardistNucModel = "StandardFluo.zip";
-    public String stardistFociModel = "pmls2.zip";
+    public String stardistFociModel = "fociRNA-1.2.zip";
     private String stardistOutput = "Label Image"; 
     
     private double minNucVol = 50;
@@ -126,6 +126,19 @@ public class Tools {
             return false;
         }
         return true;
+    }
+    
+    /**
+     * Find stardist models in Fiji models folder
+     * 
+    */
+    public String[] findStardistModels() {
+        FilenameFilter filter = (dir, name) -> name.endsWith(".zip");
+        File[] modelList = modelsPath.listFiles(filter);
+        String[] modelFiles = new String[modelList.length];
+        for (int i = 0; i < modelList.length; i++)
+            modelFiles[i] = modelList[i].getName();
+        return modelFiles;
     }
     
     
@@ -263,7 +276,8 @@ public class Tools {
     /**
      * Generate dialog box
      */
-    public String[] dialog(String[] chs) {      
+    public String[] dialog(String[] chs) { 
+        String[] modelFiles = findStardistModels();
         GenericDialogPlus gd = new GenericDialogPlus("Parameters");
         gd.setInsets​(0, 100, 0);
         gd.addImage(icon);
@@ -280,6 +294,7 @@ public class Tools {
         
         gd.addMessage("Foci detection", Font.getFont("Monospace"), Color.blue);
         gd.addChoice("Foci detection method : ", fociDetectionMethods, fociDetectionMethods[0]);
+        gd.addChoice("Stardist model :", modelFiles, stardistFociModel);
         gd.addNumericField("Min foci volume (µm3): ", minFociVol);
         gd.addNumericField("Max foci volume (µm3): ", maxFociVol);
         gd.addNumericField("Foci intensity threshold : ", fociTh);
@@ -298,6 +313,7 @@ public class Tools {
         minNucVol = gd.getNextNumber();
         maxNucVol = gd.getNextNumber();
         fociDetectionMethod = gd.getNextChoice();
+        stardistFociModel = gd.getNextChoice();
         minFociVol = gd.getNextNumber();
         maxFociVol = gd.getNextNumber();
         fociTh = gd.getNextNumber();
@@ -676,7 +692,8 @@ public class Tools {
         ImagePlus imgObjects = new RGBStackMerge().mergeHyperstacks(imgColors, false);
         imgObjects.setCalibration(img.getCalibration());
         FileSaver ImgObjectsFile = new FileSaver(imgObjects);
-        ImgObjectsFile.saveAsTiff(outDir + imageName + "_" + fociDetectionMethod + ".tif"); 
+        String fociModel = stardistFociModel.split(".zip")[0];
+        ImgObjectsFile.saveAsTiff(outDir + imageName + "_" + fociDetectionMethod + "_"+fociModel+".tif"); 
         imgObj1.closeImagePlus();
         imgObj2.closeImagePlus();
         flush_close(imgObjects);
